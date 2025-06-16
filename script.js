@@ -24,8 +24,6 @@ class HealthTracker {
     }
 
     checkLogin() {
-        // Проверяем, есть ли сохраненный пользователь в localStorage
-        // Если пользователь уже сохранен, автоматически загружаем его данные и переходим в приложение
         const savedUser = localStorage.getItem('currentUser');
         if (savedUser) {
             this.currentUser = JSON.parse(savedUser);
@@ -83,7 +81,6 @@ class HealthTracker {
     }
 
     logout() {
-        // Очищаем сохраненного пользователя из localStorage, чтобы при следующем входе потребовался логин
         localStorage.removeItem('currentUser');
         this.currentUser = null;
         this.userProfile = null;
@@ -104,15 +101,19 @@ class HealthTracker {
     }
 
     handleLogin() {
-        const login = document.getElementById('login').value;
-        const password = document.getElementById('password').value;
+        const login = document.getElementById('login').value.trim();
+        const password = document.getElementById('password').value.trim();
+
+        if (!login || !password) {
+            alert('Пожалуйста, заполните все поля');
+            return;
+        }
 
         const users = JSON.parse(localStorage.getItem('users') || '[]');
         const user = users.find(u => u.login === login && u.password === password);
 
         if (user) {
             this.currentUser = user;
-            // Сохраняем пользователя в localStorage, чтобы при следующем запуске не вводить логин и пароль
             localStorage.setItem('currentUser', JSON.stringify(user));
             document.getElementById('login-modal').style.display = 'none';
             this.loadUserData();
@@ -130,8 +131,13 @@ class HealthTracker {
     }
 
     handleRegister() {
-        const login = document.getElementById('login').value;
-        const password = document.getElementById('password').value;
+        const login = document.getElementById('login').value.trim();
+        const password = document.getElementById('password').value.trim();
+
+        if (!login || !password) {
+            alert('Пожалуйста, заполните все поля');
+            return;
+        }
 
         let users = JSON.parse(localStorage.getItem('users') || '[]');
         if (users.find(u => u.login === login)) {
@@ -311,7 +317,7 @@ class HealthTracker {
             'йога': 3,
             'функциональный тренинг': 7
         };
-        return intensityMap[exerciseType.toLowerCase()] || 5; // Значение по умолчанию 5 ккал/мин
+        return intensityMap[exerciseType.toLowerCase()] || 5;
     }
 
     setupUI() {
@@ -459,20 +465,18 @@ class HealthTracker {
     }
 
     setupDashboardEventListeners() {
-        // Обработка добавления шагов
         document.getElementById('add-steps-btn').addEventListener('click', () => {
             const stepsInput = document.getElementById('steps-input');
             const stepsToAdd = parseInt(stepsInput.value) || 0;
             if (stepsToAdd > 0) {
                 this.healthData.steps += stepsToAdd;
-                this.healthData.distance += stepsToAdd * 0.762; // 1 шаг = 0.762 м
-                this.healthData.caloriesBurned += Math.round(stepsToAdd * 0.04); // Примерный расчет
+                this.healthData.distance += stepsToAdd * 0.762;
+                this.healthData.caloriesBurned += Math.round(stepsToAdd * 0.04);
                 this.saveUserData();
                 this.updateDashboard();
             }
         });
 
-        // Обработка сброса шагов
         document.getElementById('reset-steps-btn').addEventListener('click', () => {
             this.healthData.steps = 0;
             this.healthData.distance = 0;
@@ -483,25 +487,22 @@ class HealthTracker {
             this.updateDashboard();
         });
 
-        // Обработка добавления воды
         document.getElementById('add-water-btn').addEventListener('click', () => {
             const waterInput = document.getElementById('water-input');
             const waterToAdd = parseInt(waterInput.value) || 0;
             if (waterToAdd > 0) {
-                this.healthData.waterIntake += Math.floor(waterToAdd / 250); // 1 стакан = 250 мл
+                this.healthData.waterIntake += Math.floor(waterToAdd / 250);
                 this.saveUserData();
                 this.updateDashboard();
             }
         });
 
-        // Обработка сброса воды
         document.getElementById('reset-water-btn').addEventListener('click', () => {
             this.healthData.waterIntake = 0;
             this.saveUserData();
             this.updateDashboard();
         });
 
-        // Обработка добавления калорий
         document.getElementById('add-calories-btn').addEventListener('click', () => {
             const caloriesInput = document.getElementById('calories-input');
             const caloriesToAdd = parseInt(caloriesInput.value) || 0;
@@ -512,14 +513,12 @@ class HealthTracker {
             }
         });
 
-        // Обработка сброса калорий
         document.getElementById('reset-calories-btn').addEventListener('click', () => {
             this.healthData.caloriesConsumed = 0;
             this.saveUserData();
             this.updateDashboard();
         });
 
-        // Обработка добавления упражнения
         document.getElementById('add-exercise-btn').addEventListener('click', () => {
             const exerciseNameInput = document.getElementById('exercise-name-input');
             const exerciseDurationInput = document.getElementById('exercise-duration-input');
@@ -542,7 +541,6 @@ class HealthTracker {
             }
         });
 
-        // Обработка сброса упражнений
         document.getElementById('reset-exercises-btn').addEventListener('click', () => {
             const totalExerciseCalories = this.healthData.activities.reduce((sum, activity) => sum + activity.calories, 0);
             this.healthData.caloriesBurned -= totalExerciseCalories;
@@ -552,7 +550,6 @@ class HealthTracker {
             this.updateDashboard();
         });
 
-        // Обработка удаления упражнения
         document.querySelectorAll('.delete-exercise').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const id = parseInt(e.target.closest('button').getAttribute('data-id'));
@@ -567,7 +564,6 @@ class HealthTracker {
             });
         });
 
-        // Дополнительно: обработка события change для полей ввода
         document.getElementById('steps-input').addEventListener('change', () => {
             document.getElementById('add-steps-btn').click();
         });
